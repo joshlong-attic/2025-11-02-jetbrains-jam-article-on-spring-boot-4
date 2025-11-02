@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
@@ -24,7 +25,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authorization.EnableGlobalMultiFactorAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.GrantedAuthorities;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,10 +40,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@EnableGlobalMultiFactorAuthentication(authorities = {
-        GrantedAuthorities.FACTOR_PASSWORD_AUTHORITY,
-        GrantedAuthorities.FACTOR_OTT_AUTHORITY
-})
 @EnableResilientMethods
 @ImportHttpServices(CatFacts.class)
 @Import(MyBeanRegistrar.class)
@@ -54,13 +51,26 @@ public class DogsServiceApplication {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
     JdbcPostgresDialect jdbcPostgresDialect() {
         return JdbcPostgresDialect.INSTANCE;
+    }
+//
+//    @Bean
+//    Runner runner(DogRepository repository) {
+//        return new Runner(repository);
+//    }
+}
+
+@EnableGlobalMultiFactorAuthentication(authorities = {
+        FactorGrantedAuthority.PASSWORD_AUTHORITY,
+        FactorGrantedAuthority.OTT_AUTHORITY
+})
+@Configuration
+class SecurityConfiguration {
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
@@ -95,11 +105,6 @@ public class DogsServiceApplication {
     }
 
 
-//
-//    @Bean
-//    Runner runner(DogRepository repository) {
-//        return new Runner(repository);
-//    }
 }
 
 
@@ -110,14 +115,14 @@ class MyBeanRegistrar implements BeanRegistrar {
 
         registry.registerBean(RiskyClient.class);
         registry.registerBean(Runner.class);
-
-        /*registry.registerBean(Runner.class, spec -> spec
+        registry.registerBean(Runner.class, spec -> spec
                 .description("description")
                 .supplier(supplierContext -> {
                     var dogRepository = supplierContext.bean(DogRepository.class);
-                    return new Runner(dogRepository);
+                    var catFacts = supplierContext.beanProvider(CatFacts.class);
+                    return new Runner(dogRepository, catFacts.getIfUnique());
                 })
-        ); */
+        );
     }
 }
 
@@ -153,23 +158,16 @@ class Runner implements ApplicationRunner {
     private final DogRepository repository;
     private final CatFacts facts;
 
-    private final RiskyClient client;
-
-    Runner(DogRepository repository, CatFacts facts, RiskyClient client) {
+    Runner(DogRepository repository, CatFacts facts) {
         this.repository = repository;
         this.facts = facts;
-        this.client = client;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
         this.repository.findAll().forEach(IO::println);
         this.repository.findByName("Prancer").forEach(IO::println);
-
         this.facts.facts().facts().forEach(IO::println);
-
-        this.client.doSomethingThatMightFail();
     }
 }
 
@@ -195,6 +193,31 @@ interface CatFacts {
 
 // look mom, no Lombok!
 record Dog(@Id int id, String name, String description) {
+}
+
+@Controller
+@ResponseBody
+class CatsController {
+
+    private final CatFacts facts;
+
+    private final AtomicInteger count = new AtomicInteger();
+
+    CatsController(CatFacts facts) {
+        this.facts = facts;
+    }
+
+    @ConcurrencyLimit(10)
+    @Retryable(maxAttempts = 4, includes = BadException.class)
+    @GetMapping("/facts")
+    Collection<CatFact> facts() throws Exception {
+        if (this.count.incrementAndGet() < 3) {
+            IO.println("trying...");
+            throw new BadException();
+        }
+        IO.println("done");
+        return this.facts.facts().facts();
+    }
 }
 
 @Controller
