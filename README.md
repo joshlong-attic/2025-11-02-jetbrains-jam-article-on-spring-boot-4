@@ -304,6 +304,9 @@ With this in place, the user will be asked to authenticate _twice_ before being 
 
 ## Miles to go before we sleep 
 
-This has been a quick and roving tour of some of my favorite features in the next generation of Spring Framework and Spring Boot. I hope that you got something out of this. The code is here for your refernce.
+This has been a quick and roving tour of some of my favorite features in the next generation of Spring Framework and Spring Boot. I hope that you got something out of this. The code is here for your [reference](https://github.com/joshlong-attic/2025-11-02-jetbrains-jam-article-on-spring-boot-4).
 
 We're in the final weeks in the run up to the new release and while there's still a bit of work to do, things are in a very good shape already. As always, we encourage users to kick the tires and try everything out on the Spring Initializer (just make sure to specify the latest version of Spring Boot that you see there). 
+
+## About the author 
+Josh Long works on the Spring team as its number one fan. You can find more of his content - blogs, Youtube content, podcasts, etc., on his [website](https://joshlong.com).
