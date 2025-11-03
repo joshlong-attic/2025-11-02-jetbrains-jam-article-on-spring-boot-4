@@ -73,23 +73,16 @@ Spring Security brings with it a lot of nice new features, two of my favorites a
 
 ```java
 @EnableGlobalMultiFactorAuthentication(authorities = {
-        FactorGrantedAuthority.PASSWORD_AUTHORITY,
-        FactorGrantedAuthority.OTT_AUTHORITY
+    FactorGrantedAuthority.PASSWORD_AUTHORITY, FactorGrantedAuthority.OTT_AUTHORITY
 })
 @Configuration
 class SecurityConfiguration {
-    
-    ...
 
     @Bean
     Customizer<HttpSecurity> httpSecurityCustomizer() {
         return httpSecurity -> httpSecurity
-                .webAuthn(w -> w
-                    ...
-                )
-                .oneTimeTokenLogin(ott ->
-                    ... 
-                );
+                .webAuthn(w -> ... )
+                .oneTimeTokenLogin(ott -> ... );
     }
 }
 ```
