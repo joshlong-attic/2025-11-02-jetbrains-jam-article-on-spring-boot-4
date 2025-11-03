@@ -1,8 +1,8 @@
 # README
 
-Hi, Spring fans! Later this month we get Spring Framework 7 and Spring Boot 4 and all the portfolio projects that Spring Boot 4 depends on. Let's at least look at some of my favorite features together. **Jakarta EE 11** 11 is the new baseline. We've retained a **Java** 17 baseline but _strongly_ encourage a Java 25 posture whenever possible. We've moved the baseline to GraalVM 25 for native images. we've updated our **Kotlin** support  to Kotlin 2.2.  The new generation of projects assumes the new  **Jackson 3**, the popular JSON marshalling library. We've introduced **JSpecify nullability** annotations across the portfolio to finally eliminate  Tony Hoare's   $1 billion dollar mistake - `null` references. Spring Boot 4 has decomposed the  autoconfiguration artifact into smaller more **modular autoconfigurations**. 
+Hi, Spring fans! Spring Boot 4 comes out in November 2025!  Let's at least look at some of my favorite features together. **Jakarta EE 11** 11 is the new baseline. We've retained a **Java** 17 baseline but _strongly_ encourage a Java 25 posture whenever possible. We've moved the baseline to **GraalVM 25** for native images. we've updated our **Kotlin** support to Kotlin 2.2. The new generation of projects assumes the new  **Jackson 3**. We've introduced **JSpecify nullability** annotations across the portfolio to finally eliminate Tony Hoare's $1 billion dollar mistake - `null` references. Spring Boot 4 has decomposed the autoconfiguration artifact into smaller, more **modular autoconfigurations**. 
 
-One of my favorite new features is **API versioning**. Here's a Spring MVC controller with two endpoints, each designated a particular _version_, the default of which we can specify with `spring.mvc.apiversion.default=1.1`.  
+One of my favorite new features is **API versioning**. Here's a Spring MVC controller with two endpoints, each designated a particular _version_, the default version of which we can specify with `spring.mvc.apiversion.default=1.1`.  
 
 ```java
 
@@ -51,7 +51,8 @@ We built a simple client, and it should work, but what if the service is down? W
     ...
 
 ```
-What if you want to dynamically register beans with Spring? What if you want to minimize reflection? Java configuration and component scanning are very powerful, but they're not dynamic, and they rely heavily on reflection when run on the JVM. In Spring Framework 7, we've introduced **BeanRegistrar** to help with both. Here's an example of implicitly and explicitly defining bean of class `Runner` twice. You can activate it by `@Import`-ing it just like you would other Java configuration classes. 
+
+Spring Framework 7 brings **BeanRegistrar** configuration, which are a more dynamic alternative to Java configuration that can be used in conjunction with Java configuration and component scanning with the usual `@Import` annotation.
 
 ```java
 class MyBeanRegistrar implements BeanRegistrar {
@@ -72,9 +73,8 @@ class MyBeanRegistrar implements BeanRegistrar {
 Spring Security brings with it a lot of nice new features, two of my favorites are multi-factor auth, allowing you to require that multiple authentication factors be present, and `Customizer<HttpSecurity>` beans for additive changes to the `HttpSecurity` configuration. 
 
 ```java
-@EnableGlobalMultiFactorAuthentication(authorities = {
-    FactorGrantedAuthority.PASSWORD_AUTHORITY, FactorGrantedAuthority.OTT_AUTHORITY
-})
+@EnableGlobalMultiFactorAuthentication(
+    authorities = { FactorGrantedAuthority.PASSWORD_AUTHORITY, FactorGrantedAuthority.OTT_AUTHORITY })
 @Configuration
 class SecurityConfiguration {
 
@@ -86,4 +86,4 @@ class SecurityConfiguration {
     }
 }
 ```
- The code is here for your [reference](https://github.com/joshlong-attic/2025-11-02-jetbrains-jam-article-on-spring-boot-4). We encourage users to kick the tires and try everything out on the [Spring Initializer](https://start.spring.io).
+ The code is here for your [reference](https://github.com/joshlong-attic/2025-11-02-jetbrains-jam-article-on-spring-boot-4). I encourage users to kick the tires and try everything out on the [Spring Initializer](https://start.spring.io) and enjoy your journey to production!
